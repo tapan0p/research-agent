@@ -58,6 +58,6 @@ def summarize_content_from_urls(url_list: List[str]) -> str:
             content = load_document_from_web.invoke({"url":url})
         
         content = summarize_content.invoke({"content":content})
-        result += f"summary for document {index} \n {content} \n"
+        result += f"summary for document {index+1} \n {content} \n"
     
     return result.strip()

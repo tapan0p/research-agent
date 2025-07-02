@@ -1,34 +1,90 @@
-// src/components/ChatSection.jsx
 import React, { useRef, useEffect } from 'react';
 import { Send, MessageSquare, Brain, Loader2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown'; // Import react-markdown
+import remarkGfm from 'remark-gfm'; // Optional: for GitHub Flavored Markdown
 
 const ChatSection = ({ messages, input, isProcessing, setInput, handleSubmit }) => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const Message = ({ message }) => {
     const isUser = message.type === 'user';
-    
+
     return (
       <div className={`flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-          isUser ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-500 to-blue-700 text-white'
-        }`}>
+        <div
+          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+            isUser ? 'bg-blue-600 text-white' : 'bg-gradient-to-br from-blue-500 to-blue-700 text-white'
+          }`}
+        >
           {isUser ? <div className="w-4 h-4 bg-white rounded-full" /> : <Brain className="w-4 h-4" />}
         </div>
         <div className={`flex-1 ${isUser ? 'flex justify-end' : ''}`}>
-          <div className={`max-w-[80%] p-3 rounded-2xl ${
-            isUser 
-              ? 'bg-blue-600 text-white rounded-br-md' 
-              : 'bg-gray-800/70 border border-gray-600/50 rounded-bl-md shadow-lg text-white'
-          }`}>
+          <div
+            className={`max-w-[80%] p-3 rounded-2xl ${
+              isUser
+                ? 'bg-blue-600 text-white rounded-br-md'
+                : 'bg-gray-800/70 border border-gray-600/50 rounded-bl-md shadow-lg text-white'
+            }`}
+          >
             <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-              {message.content}
+              {/* Replace plain text rendering with ReactMarkdown */}
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]} // Optional: enables GFM features like tables
+                components={{
+                  // Customize rendering of Markdown elements if needed
+                  code({ node, inline, className, children, ...props }) {
+                    return inline ? (
+                      <code className="bg-gray-700/50 px-1 py-0.5 rounded text-sm" {...props}>
+                        {children}
+                      </code>
+                    ) : (
+                      <pre className="bg-gray-700/50 p-3 rounded-lg overflow-x-auto">
+                        <code className={className} {...props}>
+                          {children}
+                        </code>
+                      </pre>
+                    );
+                  },
+                  a({ href, children }) {
+                    return (
+                      <a
+                        href={href}
+                        className="text-blue-400 hover:underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {children}
+                      </a>
+                    );
+                  },
+                  ul({ children }) {
+                    return <ul className="list-disc list-inside my-2">{children}</ul>;
+                  },
+                  ol({ children }) {
+                    return <ol className="list-decimal list-inside my-2">{children}</ol>;
+                  },
+                  h1({ children }) {
+                    return <h1 className="text-2xl font-bold my-2">{children}</h1>;
+                  },
+                  h2({ children }) {
+                    return <h2 className="text-xl font-semibold my-2">{children}</h2>;
+                  },
+                  h3({ children }) {
+                    return <h3 className="text-lg font-medium my-2">{children}</h3>;
+                  },
+                  p({ children }) {
+                    return <p className="my-1">{children}</p>;
+                  },
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
             </div>
-            
+
             {message.hasChart && (
               <div className="mt-4 p-4 bg-gradient-to-r from-blue-900/50 to-gray-800/50 rounded-lg border border-blue-700/30">
                 <div className="h-40 bg-gray-900/50 rounded border border-gray-600/30 flex items-center justify-center">
@@ -37,20 +93,23 @@ const ChatSection = ({ messages, input, isProcessing, setInput, handleSubmit }) 
                 </div>
               </div>
             )}
-            
+
             {message.sources && (
               <div className="mt-3 pt-3 border-t border-gray-600/30">
                 <p className="text-xs text-gray-400 mb-2">Sources:</p>
                 <div className="flex flex-wrap gap-2">
                   {message.sources.map((source, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-gray-700/70 text-gray-300 text-xs rounded-full border border-gray-600/30">
+                    <span
+                      key={idx}
+                      className="px-2 py-1 bg-gray-700/70 text-gray-300 text-xs rounded-full border border-gray-600/30"
+                    >
                       {source.title} ({source.count})
                     </span>
                   ))}
                 </div>
               </div>
             )}
-            
+
             <p className={`text-xs mt-2 ${isUser ? 'text-blue-200' : 'text-gray-400'}`}>
               {message.timestamp.toLocaleTimeString()}
             </p>
@@ -73,8 +132,8 @@ const ChatSection = ({ messages, input, isProcessing, setInput, handleSubmit }) 
           </div>
           <div className="mt-2 flex gap-1">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
           </div>
         </div>
       </div>
@@ -138,9 +197,7 @@ const ChatSection = ({ messages, input, isProcessing, setInput, handleSubmit }) 
             ) : (
               <Send className="w-4 h-4" />
             )}
-            <span className="hidden sm:inline">
-              {isProcessing ? 'Processing...' : 'Send'}
-            </span>
+            <span className="hidden sm:inline">{isProcessing ? 'Processing...' : 'Send'}</span>
           </button>
         </form>
       </div>
