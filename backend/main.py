@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket ,  WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from Agent.agent_manager import AgentManager
 
@@ -16,17 +16,20 @@ app.add_middleware(
 @app.websocket("/ws/query")
 async def websocket_query(websocket: WebSocket):
     await websocket.accept()
+    print("WebSocket connected")
+
     try:
-        data = await websocket.receive_json()
-        query = data.get("query")
-        if not query:
-            await websocket.send_json({"error": "Query not provided"})
-            return
+        while True:
+            data = await websocket.receive_json()
+            query = data.get("query")
+            if not query:
+                await websocket.send_json({"error": "Query not provided"})
+                continue
 
-        await agent.process_query(query, websocket)
-        await websocket.send_json({"status": "done"})
+            await agent.process_query(query, websocket)
+            await websocket.send_json({"status": "done"})
 
+    except WebSocketDisconnect:
+        print("WebSocket disconnected")
     except Exception as e:
         await websocket.send_json({"error": str(e)})
-    finally:
-        await websocket.close()

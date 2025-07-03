@@ -39,7 +39,7 @@ class AgentManager:
         )
         self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.1).bind_tools(self.tools)
 
-        self.llm_QA =self.markdown_prompt | ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.8)
+        self.llm_QA =ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.8)
         self.llm_markdown = self.markdown_prompt | ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.5)
         self.max_steps = 10
         self.max_history_words = 5000

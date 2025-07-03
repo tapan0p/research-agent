@@ -96,7 +96,9 @@ function App() {
     // Handle query completion
     if (data.status === 'done') {
       console.log('Query processing completed');
-      setIsProcessing(false);
+      if(isProcessing){
+        setIsProcessing(false)
+      }
       return;
     }
 
@@ -180,13 +182,8 @@ function App() {
   // Initialize WebSocket connection on component mount
   useEffect(() => {
     connectWebSocket();
-    
-    // Cleanup function - don't close WebSocket on unmount unless component is truly unmounting
     return () => {
-      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-        console.log('Component unmounting, closing WebSocket');
-        wsRef.current.close(1000, 'Component unmounting');
-      }
+      
     };
   }, []);
 
