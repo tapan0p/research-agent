@@ -29,9 +29,18 @@ class AgentManager:
             summarize_content,
             summarize_content_from_urls
         ]
+
+        self.markdown_prompt = PromptTemplate.from_template(
+            """Convert the following content into proper structured markdown format. The content can contain json structure or unstructured format, normalize them and convert it to proper markdown format for easy reading. Do not generate unnecessary content, regerate only the required output.
+            content:
+            {content}
+            
+            """
+        )
         self.llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.1).bind_tools(self.tools)
 
-        self.llm_QA =ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.8)
+        self.llm_QA =self.markdown_prompt | ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.8)
+        self.llm_markdown = self.markdown_prompt | ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.5)
         self.max_steps = 10
         self.max_history_words = 5000
         self.tool_map = {tool.name: tool for tool in self.tools}
@@ -156,9 +165,10 @@ class AgentManager:
                     result[query] = {"error": f"Tool {tool_name} not found"}
                     return result
 
+                tool_output = tool.invoke(parameters)
+                markdown_output = self.llm_markdown.invoke({"content": tool_output})
+                result[query] = {"result": markdown_output.content}
 
-                result[query] = {"result": tool.invoke(parameters)}
-    
             else:
                 # Handle general query without a tool using the LLM directly
                 response = self.llm_QA.invoke(query)
