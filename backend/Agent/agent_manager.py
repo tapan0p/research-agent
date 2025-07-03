@@ -3,7 +3,6 @@ from typing import Dict, List, Optional
 from langchain_core.tools import tool
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_groq import ChatGroq
 from langchain_core.runnables import RunnablePassthrough
 from dotenv import load_dotenv
 import json
